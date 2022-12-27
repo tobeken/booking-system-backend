@@ -62,3 +62,31 @@ export const adminLogin = async(req,res,next) => {
     return res.status(200).json({message:"Authentication Complete",token,id:existingAdmin._id});
 
 }
+
+export const getAdmins = async(req,res,next) => {
+    let admins;
+    try{
+        admins = await Admin.find();
+    }catch(err){
+        return console.log(err)
+    }
+    if(!admins){
+        return res.status(500).json({message:"Internal server error"})
+    }
+    return res.status(200).json({ admins })
+}
+
+export const getAdminById = async(res,req,next) => {
+    const id = req.params.id;
+
+    let admin;
+    try{
+        admin = await Admin.findById(id).populate("addedMovies");
+    }catch(err){
+        return console.log(err)
+    }
+    if(!admin){
+        return console.log("cannot find admin");
+    }
+    return res.status(200).json({admin})
+}
