@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import Admin from "../models/Admin";
 import Movie from "../models/Movie";
 export const addMovie = async(req,res,next) => {
     const extractedToken  = req.headers.authorization.split(" ")[1];
@@ -37,7 +39,16 @@ export const addMovie = async(req,res,next) => {
             admin:adminId,
             posterUrl,
         });
-        movie = await movie.save()
+
+        const session = await mongoose.startSession();
+        const adminUser = await Admin.findById(adminId);
+        session.startTransaction();
+        await movie.save({session});
+        adminUser.addedMovies.push(movie);
+        await adminUser.save({session})
+        await session.commitTransaction();
+
+
     }catch(err){
         return console.log(err)
     }
